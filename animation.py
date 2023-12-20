@@ -49,9 +49,6 @@ async def sleep(ticks=1):
         await asyncio.sleep(0)
 
 
-# read_controls() -> draw_frame() -> sleep() -> draw_frame(negative=True) вот такая примерно должна схема получиться внутри функции с кораблем. Вы считываете управление - расcчитываете новые координаты корабля, перезаписываете переменные row и column и отрисовываете и по новой
-
-
 def animate_spaceship(dir):
     frames = []
     folder_files = os.listdir(dir)
@@ -63,13 +60,15 @@ def animate_spaceship(dir):
 
 
 async def animate_rocket(canvas, frames):
+    row, column = get_frame_size(frames[0])
+    height, width = canvas.getmaxyx()
+    y = (height - row) // 2
+    x = (width - column) // 2
     for frame in cycle(frames):
-        row, column = get_frame_size(frame)
-        height, width = canvas.getmaxyx()
-        y = (height - row) // 2
-        x = (width - column) // 2
+        rows_direction, columns_direction, _ = read_controls(canvas)
+        y += rows_direction
+        x += columns_direction
 
         draw_frame(canvas, y, x, text=frame)
         await sleep(2)
-
         draw_frame(canvas, y, x, text=frame, negative=True)
